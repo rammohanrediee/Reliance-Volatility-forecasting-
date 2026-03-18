@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import numpy as np
 import pandas as pd
@@ -9,8 +10,25 @@ from arch import arch_model
 from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
+import logging
+
+# Configure structured logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("volatility_api")
 
 app = FastAPI(title="Reliance Stock Volatility Forecasting")
+
+# Configure CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific frontend domains
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount static files
 import os
@@ -22,9 +40,9 @@ try:
     model_data = joblib.load('garch_model.pkl')
     garch_model = model_data['model']
     historical_returns = model_data['returns']
-    print("GARCH model loaded successfully")
+    logger.info("GARCH model loaded successfully")
 except Exception as e:
-    print(f"Warning: Could not load model - {e}")
+    logger.error(f"Could not load model - {e}")
     garch_model = None
 
 
@@ -189,6 +207,7 @@ def retrain_model():
         garch_model = fitted
         historical_returns = returns
 
+        logger.info(f"Successfully retrained model with {len(returns)} data points.")
         return {
             "status": "retrained",
             "data_points": len(returns),
