@@ -1,0 +1,45 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (if stored locally - uncomment if needed)
+# data/
+# *.csv
+# *.xlsx
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Testing and Experiments
+test/
