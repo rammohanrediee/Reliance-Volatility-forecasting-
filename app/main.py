@@ -45,6 +45,9 @@ import os
 static_dir = os.path.join(os.path.dirname(__file__), '..', 'static')
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+# Configuration
+TICKER_SYMBOL = os.getenv("TICKER_SYMBOL", "RELIANCE.NS")
+
 # Load the pre-trained model
 try:
     model_data = joblib.load('garch_model.pkl')
@@ -112,7 +115,7 @@ def get_historical_volatility(days: int = 90):
     """Return rolling 21-day and 60-day historical volatility for the last N trading days."""
     try:
         # Fetch latest data
-        ticker = yf.Ticker("RELIANCE.NS")
+        ticker = yf.Ticker(TICKER_SYMBOL)
         data = ticker.history(period="5y")
         
         # Calculate returns
@@ -145,13 +148,13 @@ def get_historical_volatility(days: int = 90):
 def get_stock_price():
     """Fetch the latest closing price from Yahoo Finance."""
     try:
-        ticker = yf.Ticker("RELIANCE.NS")
+        ticker = yf.Ticker(TICKER_SYMBOL)
         data = ticker.history(period="1d")
         
         if len(data) > 0:
             current_price = float(data['Close'].iloc[-1])
             return {
-                "symbol": "RELIANCE.NS",
+                "symbol": TICKER_SYMBOL,
                 "current_price": current_price,
                 "date": data.index[-1].strftime('%Y-%m-%d'),
                 "currency": "INR"
@@ -167,7 +170,7 @@ def get_summary():
     """Build an executive summary combining historical stats with GARCH forecasts."""
     try:
         # Get historical volatility
-        ticker = yf.Ticker("RELIANCE.NS")
+        ticker = yf.Ticker(TICKER_SYMBOL)
         data = ticker.history(period="5y")
         log_close = np.log(data['Close'])
         returns = log_close.diff().dropna() * 100
@@ -199,7 +202,7 @@ def retrain_model():
     global garch_model, historical_returns
 
     try:
-        ticker = yf.Ticker("RELIANCE.NS")
+        ticker = yf.Ticker(TICKER_SYMBOL)
         data = ticker.history(period="5y")
 
         if data.empty or len(data) < 100:
@@ -242,7 +245,7 @@ def retrain_model():
 def get_live_forecast(days: int = 30):
     """Fetch fresh data, fit GARCH on the fly, and return an up-to-date forecast."""
     try:
-        ticker = yf.Ticker("RELIANCE.NS")
+        ticker = yf.Ticker(TICKER_SYMBOL)
         data = ticker.history(period="5y")
 
         if data.empty:
